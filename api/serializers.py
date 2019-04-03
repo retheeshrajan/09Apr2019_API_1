@@ -40,14 +40,7 @@ class ItemNameSerializer(serializers.ModelSerializer):
         model = Item
         fields = ['name','image']
 
-
-class CartListSerializer(serializers.ModelSerializer):
-    item=ItemNameSerializer()
-    class Meta:
-        model = Item
-        fields = ['item','quantity','price']
-
-class OrderCreateSerializer(serializers.ModelSerializer):
+class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = '__all__'
@@ -55,16 +48,28 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 class OrderUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['status','reference',]
+        fields = ['status','total']
 
-class OrderDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Order
-        fields = ['id','date','total']
 
 class CartCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
+        fields = '__all__'
+
+class CartUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cart
+        fields = ['quantity',]
+
+class CartListSerializer(serializers.ModelSerializer):
+    item=ItemNameSerializer()
+    class Meta:
+        model = Cart
+        fields = ['id','item','quantity','price']
+
+class ItemCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Item
         fields = '__all__'
 
 
