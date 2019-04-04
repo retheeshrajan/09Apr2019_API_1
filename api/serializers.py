@@ -28,7 +28,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 class ItemListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
-        fields = ['name','description','price','image']
+        fields = ['id','name','description','price','image']
 
 class ItemDetailSerializer(serializers.ModelSerializer):
     class Meta:
@@ -40,26 +40,36 @@ class ItemNameSerializer(serializers.ModelSerializer):
         model = Item
         fields = ['name','image']
 
+
 class OrderSerializer(serializers.ModelSerializer):
+
+    orderSum = serializers.SerializerMethodField()
+    
     class Meta:
         model = Order
-        fields = '__all__'
+        fields = ['id','date','orderSum']
 
-class OrderUpdateSerializer(serializers.ModelSerializer):
+    def get_orderSum(self, obj):
+        quantity = 0
+        totalPrice = 0
+        carts = Cart.objects.filter(order = obj)
+        for i in carts:
+            quantity = quantity + i.quantity  
+            totalPrice = totalPrice + (i.quantity * i.price ) 
+            orderSum = str(quantity)+' Item ' + str(totalPrice) +' KD'
+        return orderSum
+
+class CheckOutSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['status','total']
+        fields = ['status',]
 
 
-class CartCreateSerializer(serializers.ModelSerializer):
+
+class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
         fields = '__all__'
-
-class CartUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Cart
-        fields = ['quantity',]
 
 class CartListSerializer(serializers.ModelSerializer):
     item=ItemNameSerializer()
@@ -67,9 +77,5 @@ class CartListSerializer(serializers.ModelSerializer):
         model = Cart
         fields = ['id','item','quantity','price']
 
-class ItemCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Item
-        fields = '__all__'
 
 

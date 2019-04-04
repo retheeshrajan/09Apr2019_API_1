@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.generics import ListAPIView,RetrieveAPIView,RetrieveUpdateAPIView,DestroyAPIView,CreateAPIView
-from .serializers import (ItemListSerializer, ItemDetailSerializer,UserCreateSerializer,OrderUpdateSerializer,OrderSerializer,
-    CartCreateSerializer,CartListSerializer,UserUpdateSerializer,ItemCreateSerializer,CartUpdateSerializer)
+from .serializers import (ItemListSerializer, ItemDetailSerializer,UserCreateSerializer,CheckOutSerializer,OrderSerializer,
+      UserUpdateSerializer,CartSerializer,CartListSerializer)
 from rest_framework.filters import SearchFilter,OrderingFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from api.models import Item, Cart, Order
@@ -12,6 +12,8 @@ from rest_framework.response import Response
 from django.utils import timezone
 import json
 from django.core import serializers
+from django.http import Http404
+from rest_framework import status
 
 
 class UserCreateAPIView(CreateAPIView):
@@ -36,9 +38,9 @@ class ItemDetailView(RetrieveAPIView):
     lookup_url_kwarg = 'item_id'
 
 
-class OrderUpdateView(RetrieveUpdateAPIView):
+class CheckOutView(RetrieveUpdateAPIView):
     queryset = Order.objects.all()
-    serializer_class = OrderUpdateSerializer
+    serializer_class = CheckOutSerializer
     lookup_field = 'id'
     lookup_url_kwarg = 'order_id'
 
@@ -49,18 +51,11 @@ class CartListView(ListAPIView):
     filter_backends = [SearchFilter]
     search_fields = ['order',]
 
-class CartCreateAPIView(CreateAPIView):
-    serializer_class = CartCreateSerializer
-
-class CartUpdateView(RetrieveUpdateAPIView):
-    queryset = Order.objects.all()
-    serializer_class = CartUpdateSerializer
+class CartDeleteView(DestroyAPIView):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
     lookup_field = 'id'
-    lookup_url_kwarg = 'card_id'
-
-class ItemCreateAPIView(CreateAPIView):
-    serializer_class = ItemCreateSerializer
-
+    lookup_url_kwarg = 'cart_id'
 
 
 class OrderControlAPIView(APIView):
@@ -104,7 +99,7 @@ class OrderControlAPIView(APIView):
 
 # Create order and cart item 
     def CreateOrder(self,item,item_price):  
-        orders= Order.objects.create(user=self.request.user,date = timezone.now(),status = 0,total = item_price)
+        orders= Order.objects.create(user=self.request.user,date = timezone.now(),status = 0,total = 0)
         self.CreateCart(order = orders,item = item,item_price = item_price)
         return orders
 
@@ -113,6 +108,51 @@ class OrderControlAPIView(APIView):
         return carts
 
 
+class ContView():
+
+    def retrieve_object(self,pk,obj):
+        try:
+            return obj.objects.get(pk = pk)
+        except obj.DoesNotExist:
+            return Http404  
+
+    def retrieve(self, pk,obj,pserializers):
+        get_query = ContView.retrieve_object(self,pk = pk,obj=obj)
+        serializer = pserializers(get_query)
+        return Response(serializer.data)  
+
+    def update(self, request, pk, obj, pserializers,**kwargs):
+        get_query = ContView.retrieve_object(self,pk = pk,obj=obj)
+
+        for key,value in kwargs.items():
+            key = 1
+        
+
+        serializer = pserializers(get_query, data=request.data)
+        if serializer.is_valid():
+            serializer.save() 
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, pk,obj):
+        get_query = ContView.retrieve_object(self,pk = pk,obj=obj)
+        get_query.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+class OrderAPIView (APIView,ContView):
+
+    def get(self,request,pk):
+        return ContView.retrieve(self,pk = pk,obj = Order,pserializers = OrderSerializer)
+
+    def put(self, request,pk):
+        return ContView.update(self,request,pk = pk,obj = Order,pserializers = CheckOutSerializer,status=1)
+
+    def delete(self, request, pk):
+        return ContView.delete(self, pk=pk, obj=Order)
+
+    
 
 
 
