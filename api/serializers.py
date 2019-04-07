@@ -59,6 +59,15 @@ class OrderSerializer(serializers.ModelSerializer):
             orderSum = str(quantity)+' Item ' + str(totalPrice) +' KD'
         return orderSum
 
+# class OrderSerializer(serializers.ModelSerializer):
+
+#     orderQnty = serializers.IntegerField()
+#     orderSum = serializers.DecimalField(max_digits=9, decimal_places=3)
+    
+#     class Meta:
+#         model = Order
+#         fields = ['id','date','orderQnty','orderSum']
+
 class CheckOutSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order

@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import UserCreateAPIView
 from rest_framework_jwt.views import obtain_jwt_token
-from api.views import (UserCreateAPIView,UserUpdateView,ItemListView,ItemDetailView,CheckOutView,OrderControlAPIView,CartDeleteView,CartListView,OrderAPIView)
+from api.views import (UserCreateAPIView,UserUpdateView,ItemListView,ItemDetailView,CheckOutView,OrderControlAPIView,OrderDetailView,CartDeleteView,CartListView)
 
 urlpatterns = [
     path('login/', obtain_jwt_token, name='login'),
@@ -10,9 +10,9 @@ urlpatterns = [
     path('list/', ItemListView.as_view(), name='api-list'),
     path('details/<int:item_id>', ItemDetailView.as_view(), name='api-detail'),
     path('checkout/<int:order_id>', CheckOutView.as_view(), name='api-checkout'),
-    path('cart/', CartListView.as_view(), name='api-cart'),
+    path('cart/<int:id>', CartListView.as_view(), name='api-cart'),
     path('deletecart/<int:cart_id>', CartDeleteView.as_view(), name='api-deletecart'),
-    path('ctrl_order/<int:item_id>', OrderControlAPIView.as_view(), name='api-ctrl-order'),
-    path('order/<int:pk>', OrderAPIView.as_view(), name='api-order'),
-   
+    path('order/<int:id>', OrderDetailView.as_view(), name='api-deletecart'),
+    path('ctrl_order/<int:item_id>', OrderControlAPIView.as_view(), name='api-order_list'),
+    
 ]

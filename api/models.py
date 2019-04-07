@@ -14,6 +14,14 @@ class Order(models.Model):
 	date = models.DateTimeField()
 	total = models.DecimalField(max_digits=10, decimal_places=3)
 	status = models.IntegerField(default=0)
+
+	# def order_sum(self):
+	# 	totalPrice = 0
+ #        carts = self.cart_set.all()
+ #        for i in carts:
+ #            totalPrice += i.quantity * i.price 
+ #        return totalPrice;
+
     
 class Cart(models.Model):
 	item = models.ForeignKey(Item, on_delete=models.CASCADE)
