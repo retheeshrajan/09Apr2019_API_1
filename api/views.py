@@ -19,11 +19,26 @@ from rest_framework import status
 class UserCreateAPIView(CreateAPIView):
     serializer_class = UserCreateSerializer
 
-class UserUpdateView(RetrieveUpdateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserUpdateSerializer
-    lookup_field = 'id'
-    lookup_url_kwarg = 'user_id'
+class UserUpdateView(APIView):
+
+    def put(self, request):
+        try:
+            get_query = User.objects.get(pk = request.user.id)
+            serializer = UserUpdateSerializer(get_query, data=request.data)
+        except User.DoesNotExist:
+            return  Response()  
+        if serializer.is_valid():
+            serializer.save() 
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self,request):
+        try:
+            get_query = User.objects.get(pk = request.user.id)
+            serializer = UserUpdateSerializer(get_query, many=False,)  
+        except User.DoesNotExist:
+            return  Response()  
+        return Response(serializer.data)
 
 class ItemListView(ListAPIView):
     queryset = Item.objects.all()
@@ -51,9 +66,9 @@ class CartDeleteView(DestroyAPIView):
     lookup_url_kwarg = 'cart_id'
 
 class OrderDetailView(APIView):
-    def get(self,request,id):
+    def get(self,request):
         try:
-            get_query = Order.objects.get(user_id = id,status = 0)
+            get_query = Order.objects.get(user_id = request.user.id,status = 0)
             serializer = OrderSerializer(get_query, many=False,)
         except Order.DoesNotExist:
             get_query = None   
@@ -65,6 +80,16 @@ class CheckOutView(RetrieveUpdateAPIView):
     serializer_class = CheckOutSerializer
     lookup_field = 'id'
     lookup_url_kwarg = 'order_id'
+
+class OrderHistoryView(APIView):
+    def get(self,request):
+        try:
+            get_query = Order.objects.filter(user_id = request.user.id,status = 1)
+            serializer = OrderSerializer(get_query, many=True,)
+        except Order.DoesNotExist: 
+            return Response()
+        return Response(serializer.data)
+
 
 class OrderControlAPIView(APIView):
     
@@ -133,31 +158,31 @@ class OrderControlAPIView(APIView):
     #     return totalPrice;
 
 
-# class ContView():
+class ContView():
 
-#     def retrieve_object(self,pk,obj):
-#         try:
-#             return obj.objects.get(pk = pk)
-#         except obj.DoesNotExist:
-#             return Http404  
+    def retrieve_object(self,pk,obj):
+        try:
+            return obj.objects.get(pk = pk)
+        except obj.DoesNotExist:
+            return Http404  
 
-    # def retrieve(self, request,id):
-    #     get_query = Order.objects,get(user_id = id)
-    #     serializer = OrderSerializer(get_query)
-    #     return Response(serializer.data)  
+    def retrieve(self, request,id):
+        get_query = Order.objects,get(user_id = id)
+        serializer = OrderSerializer(get_query)
+        return Response(serializer.data)  
 
-    # # def update(self, request, pk):
-    #     get_query = Order.objects.get(pk = pk)
-    #     serializer = CheckOutSerializer(get_query, data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.save() 
-    #         return Response(serializer.data)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # def update(self, request, pk):
+        get_query = Order.objects.get(pk = pk)
+        serializer = CheckOutSerializer(get_query, data=request.data)
+        if serializer.is_valid():
+            serializer.save() 
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # def delete(self, pk):
-    #     get_query = Cart.objects.get(pk = pk)
-    #     get_query.delete()
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
+    def delete(self, pk):
+        get_query = Cart.objects.get(pk = pk)
+        get_query.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 

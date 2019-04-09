@@ -43,21 +43,21 @@ class ItemNameSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
 
-    orderSum = serializers.SerializerMethodField()
+    # orderSum = serializers.SerializerMethodField()
     
     class Meta:
         model = Order
-        fields = ['id','date','orderSum']
+        fields = ['id','date','order_sum']
 
-    def get_orderSum(self, obj):
-        quantity = 0
-        totalPrice = 0
-        carts = Cart.objects.filter(order = obj)
-        for i in carts:
-            quantity = quantity + i.quantity  
-            totalPrice = totalPrice + (i.quantity * i.price ) 
-            orderSum = str(quantity)+' Item ' + str(totalPrice) +' KD'
-        return orderSum
+    # def get_orderSum(self, obj):
+    #     quantity = 0
+    #     totalPrice = 0
+    #     carts = Cart.objects.filter(order = obj)
+    #     for i in carts:
+    #         quantity = quantity + i.quantity  
+    #         totalPrice = totalPrice + (i.quantity * i.price ) 
+    #         orderSum = str(quantity)+' Item ' + str(totalPrice) +' KD'
+    #     return orderSum
 
 # class OrderSerializer(serializers.ModelSerializer):
 
